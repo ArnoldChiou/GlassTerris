@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 踩雷手冊 §1.1：用 default，不要 black-translucent -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5378e">
+<title>GlassTerris</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- 踩雷手冊 §1.3：安全區域探針，JS 直接量它 -->
+<div id="safe-probe-top"></div>
+<div id="safe-probe-bottom"></div>
+
+<div id="stage">
+  <header id="hud">
+    <div id="time">TIME 180</div>
+    <div id="score">0</div>
+    <button id="restart" type="button" aria-label="重來">↻</button>
+  </header>
+  <canvas id="board"></canvas>
+  <button id="mute" type="button" aria-label="靜音">🔇</button>
+</div>
+
+<div id="level-select">
+  <div id="level-card">
+    <div id="level-title">選擇關卡</div>
+    <button class="level-option" type="button" data-level="straight">
+      <strong>簡單</strong>
+      <span>長直線空格</span>
+    </button>
+    <button class="level-option" type="button" data-level="heart">
+      <strong>困難</strong>
+      <span>愛心空格</span>
+    </button>
+  </div>
+</div>
+
+<div id="overlay" hidden>
+  <div id="overlay-card">
+    <div id="overlay-title">時間到</div>
+    <div id="overlay-score">0</div>
+    <button id="again" type="button">再玩一次</button>
+    <button id="choose-level" type="button">選擇關卡</button>
+  </div>
+</div>
+
+<pre id="debug" hidden></pre>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+:root {
+  --pink-bg: #f5378e;
+  --pink-frame: #ef2a83;
+  --cyan: #4fc9f5;
+  --cyan-dark: #1c86c4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--pink-bg);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+  font-family: "Trebuchet MS", "Noto Sans TC", system-ui, sans-serif;
+}
+
+/* 安全區域探針：只用來量，不顯示 */
+#safe-probe-top, #safe-probe-bottom {
+  position: fixed; left: 0; width: 0; pointer-events: none;
+}
+#safe-probe-top { top: 0; height: env(safe-area-inset-top, 0px); }
+#safe-probe-bottom { bottom: 0; height: env(safe-area-inset-bottom, 0px); }
+
+#stage {
+  position: fixed;
+  inset: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+           env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#hud {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55em 0.7em 0.35em; /* 用 em，跟著 #hud 的字級（= 場地寬度）走 */
+  color: var(--cyan);
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 0 var(--cyan-dark);
+}
+
+/* 字級跟著場地寬度走（relayout() 設定 #hud 的 font-size），
+   用 vw 的話在寬螢幕上會爆版 —— HUD 被縮到場地寬度，字卻照視窗放大 */
+#time { font-size: 1em; }
+
+#score {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.1em;
+  line-height: 1;
+}
+
+#restart, #mute {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  font-size: 1.35em;
+  line-height: 1;
+  cursor: pointer;
+  text-shadow: 0 2px 0 var(--cyan-dark);
+}
+
+#restart:active, #mute:active { transform: scale(0.9); }
+
+/* 場地比例固定；螢幕比它長時，多出來的空間全留在下方（靜音鍵本來就在那） */
+#board { display: block; flex: 0 0 auto; margin: 0 0 auto; }
+
+#mute {
+  position: absolute;
+  right: 3.5vw; /* relayout() 會依場地寬度覆寫 */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 2.5vh);
+  width: 2.2em; height: 2.2em;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: clamp(13px, 3.6vw, 20px);
+  display: grid;
+  place-items: center;
+}
+
+#overlay, #level-select {
+  position: fixed;
+  inset: 0;
+  background: rgba(150, 18, 78, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 10;
+}
+#overlay[hidden], #level-select[hidden] { display: none; }
+
+#overlay-card, #level-card {
+  text-align: center;
+  color: #fff;
+  padding: 8vw 12vw;
+  border-radius: 4vw;
+  background: var(--pink-bg);
+  box-shadow: 0 1.2vw 0 #c01c6b;
+}
+
+#level-card {
+  width: min(86vw, 420px);
+  padding: clamp(24px, 7vw, 42px);
+}
+
+#level-title {
+  margin-bottom: 0.8em;
+  font-size: clamp(24px, 7vw, 40px);
+  font-style: italic;
+  font-weight: 800;
+}
+
+.level-option {
+  width: 100%;
+  margin-top: 0.7em;
+  border: 3px solid #fff;
+  border-radius: 18px;
+  padding: 0.75em 1em;
+  background: #fff;
+  color: #b4185f;
+  cursor: pointer;
+  font: inherit;
+}
+
+.level-option strong,
+.level-option span { display: block; }
+.level-option strong { font-size: clamp(20px, 5.5vw, 30px); }
+.level-option span { margin-top: 0.2em; font-size: clamp(13px, 3.5vw, 18px); }
+.level-option:active { transform: translateY(2px); }
+
+#overlay-title {
+  font-size: clamp(18px, 6vw, 34px);
+  font-style: italic;
+  font-weight: 800;
+}
+
+#overlay-score {
+  margin: 0.3em 0 0.6em;
+  font-size: clamp(34px, 13vw, 76px);
+  font-weight: 800;
+  font-style: italic;
+  color: var(--cyan);
+  text-shadow: 0 3px 0 var(--cyan-dark);
+}
+
+#again, #choose-level {
+  font: inherit;
+  font-weight: 800;
+  font-size: clamp(14px, 4.5vw, 24px);
+  color: #b4185f;
+  background: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6em 1.8em;
+  cursor: pointer;
+}
+#choose-level {
+  margin-left: 0.5em;
+  color: #fff;
+  background: transparent;
+  border: 2px solid #fff;
+}
+#again:active, #choose-level:active { transform: translateY(2px); }
+
+#debug {
+  position: fixed;
+  left: 0;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  margin: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #9fe;
+  font: 11px/1.45 ui-monospace, Menlo, Consolas, monospace;
+  white-space: pre;
+  pointer-events: none;
+}
+#debug[hidden] { display: none; }
