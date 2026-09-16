@@ -1,7 +1,12 @@
-const TAP_MS = 280;
-const TAP_SLOP = 0.6;      // 以格子為單位
-const FLICK_CELLS = 3.5;   // 往下甩超過這麼多格就直接落底
+// 觸控容差一律用「絕對像素」，不能用格子數。
+// 手機上一格只有 10~11px，用 0.6 格當容差 = 6.6px，
+// 但真人點一下手指位移 5~15px 是常態 —— 實測晃 6px 方塊就跑掉一欄、
+// 晃 8px 旋轉就完全失效，變成「想轉卻往旁邊滑走」。
+const TAP_SLOP_PX = 12;      // 超過這個位移才算「在拖曳」，iOS 的觸控容差約 10px
+const TAP_MS = 320;          // 按住超過這麼久就不算點擊
+const FLICK_PX = 44;         // 往下甩超過這麼多像素就直接落底
 const FLICK_MS = 320;
+const SOFT_DROP_PX = 28;     // 明顯往下拖才加速
 
 export function bindInput(canvas, game, renderer, onAction) {
   let drag = null;
@@ -11,28 +16,40 @@ export function bindInput(canvas, game, renderer, onAction) {
   canvas.addEventListener('pointerdown', (e) => {
     if (game.state !== 'playing') return;
     canvas.setPointerCapture(e.pointerId);
-    drag = { x: e.clientX, y: e.clientY, col: game.pieceX, t: performance.now(), moved: false };
+    drag = {
+      x: e.clientX,
+      y: e.clientY,
+      t: performance.now(),
+      moved: false,
+      // 橫移的基準點。超過容差之後才設，設在「剛超過的那一刻」，
+      // 方塊才不會在拖曳開始的瞬間跳一格
+      originX: 0,
+      originCol: game.pieceX,
+    };
     act();
   });
 
   canvas.addEventListener('pointermove', (e) => {
     if (!drag) return;
-    const cell = renderer.cell;
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
 
-    if (Math.abs(dx) > cell * TAP_SLOP || Math.abs(dy) > cell * TAP_SLOP) drag.moved = true;
+    if (!drag.moved) {
+      if (Math.hypot(dx, dy) <= TAP_SLOP_PX) return; // 還在容差內，當作沒動
+      drag.moved = true;
+      drag.originX = e.clientX;
+      drag.originCol = game.pieceX;
+    }
 
-    const target = drag.col + Math.round(dx / cell);
+    const cell = renderer.cell;
+    const target = drag.originCol + Math.round((e.clientX - drag.originX) / cell);
     if (target !== game.pieceX) game.moveTo(target);
 
-    // 明顯往下拖才加速，避免橫移時誤觸
-    game.setSoftDrop(dy > cell * 1.5 && Math.abs(dy) > Math.abs(dx));
+    game.setSoftDrop(dy > SOFT_DROP_PX && Math.abs(dy) > Math.abs(dx));
   });
 
   const end = (e) => {
     if (!drag) return;
-    const cell = renderer.cell;
     const dt = performance.now() - drag.t;
     const dy = e.clientY - drag.y;
     const dx = e.clientX - drag.x;
@@ -40,7 +57,7 @@ export function bindInput(canvas, game, renderer, onAction) {
     game.setSoftDrop(false);
     if (!drag.moved && dt < TAP_MS) {
       game.rotate();
-    } else if (dy > cell * FLICK_CELLS && dt < FLICK_MS && Math.abs(dy) > Math.abs(dx) * 1.5) {
+    } else if (dy > FLICK_PX && dt < FLICK_MS && Math.abs(dy) > Math.abs(dx) * 1.5) {
       game.hardDrop();
     }
     drag = null;

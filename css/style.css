@@ -188,3 +188,36 @@ html, body {
   pointer-events: none;
 }
 #debug[hidden] { display: none; }
+
+/* 橫向螢幕：場地會被壓到格子剩 5px，直接請玩家轉回來。
+   用 max-height 而不是只看 orientation，否則桌機的橫向視窗也會被擋 */
+#rotate-hint { display: none; }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  #rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    background: var(--pink-bg);
+  }
+  #rotate-card { text-align: center; color: #fff; }
+  #rotate-icon {
+    font-size: 18vh;
+    line-height: 1;
+    animation: rotate-nudge 1.8s ease-in-out infinite;
+  }
+  #rotate-text {
+    margin-top: 0.6em;
+    font-size: clamp(16px, 5vh, 30px);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+}
+
+@keyframes rotate-nudge {
+  0%, 45%, 100% { transform: rotate(0deg); }
+  20%, 30% { transform: rotate(-90deg); }
+}

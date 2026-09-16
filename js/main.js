@@ -117,7 +117,8 @@ function frame(now) {
     fpsSince = now;
   }
 
-  game.step(dt, renderer.cell);
+  // 橫向時提示蓋住畫面，這時不要推進 —— 否則牆會在玩家看不到的時候繼續往上長
+  if (getComputedStyle(el('rotate-hint')).display === 'none') game.step(dt, renderer.cell);
   renderer.draw(game.snapshot());
   syncHud();
   if (DEBUG) syncDebug();
